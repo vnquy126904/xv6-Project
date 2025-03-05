@@ -1,76 +1,347 @@
 diff --git a/23127114_23127317_23127453.patch b/23127114_23127317_23127453.patch
-index 04fa0e7..e69de29 100644
---- a/23127114_23127317_23127453.patch
+new file mode 100644
+index 0000000..bf183e1
+--- /dev/null
 +++ b/23127114_23127317_23127453.patch
-@@ -1,71 +0,0 @@
--diff --git a/23127114_23127317_23127453.patch b/23127114_23127317_23127453.patch
--index 8c1d755..e69de29 100644
----- a/23127114_23127317_23127453.patch
--+++ b/23127114_23127317_23127453.patch
--@@ -1,66 +0,0 @@
---diff --git a/23127114_23127317_23127453.patch b/23127114_23127317_23127453.patch
---deleted file mode 100644
---index e69de29..0000000
---diff --git a/Makefile b/Makefile
---index db18b8d..74e454f 100644
------ a/Makefile
---+++ b/Makefile
---@@ -194,7 +194,7 @@ UPROGS=\
--- 	$U/_grind\
--- 	$U/_wc\
--- 	$U/_zombie\
----	$U/_xargs\
---+
--- 
--- 
--- 
---diff --git a/user/xargs.c b/user/xargs.c
---deleted file mode 100644
---index 929dc7a..0000000
------ a/user/xargs.c
---+++ /dev/null
---@@ -1,43 +0,0 @@
----#include "kernel/types.h"
----#include "kernel/param.h"
----#include "user/user.h"
----
----int main(int argc, char* argv[]) {
----    char *nargs[MAXARG];
----    int argCount = 0;
----    for(int i = 1; i < argc; i++) {
----        nargs[argCount++] = argv[i];
----    }
----
----    char tmpchar = 0;
----    char buffer[1024];
----
----    int status = 1;
----    while(status) {
----        int pos = 0;
----        int argStartPos = 0;
----        
----        while(1) {
----            status = read(0, &tmpchar, 1);
----            if(status == 0) exit(0);
----            if(tmpchar != ' ' && tmpchar != '\n') {
----                buffer[pos++] = tmpchar;
----            } else if(tmpchar == ' ') {
----                buffer[pos++] = 0;
----                nargs[argCount++] = &buffer[argStartPos];
----                argStartPos = pos;
----            } else if(tmpchar == '\n') {
----                nargs[argCount++] = &buffer[argStartPos];
----                argStartPos = pos;
----                break;
----            }
----        }
----
----        if(fork() == 0) {
----            exec(nargs[0], nargs);
----        } else {
----            wait(0);
----        }
----    }
----    exit(0);
----}
---\ No newline at end of file
+@@ -0,0 +1,76 @@
++diff --git a/23127114_23127317_23127453.patch b/23127114_23127317_23127453.patch
++index 04fa0e7..e69de29 100644
++--- a/23127114_23127317_23127453.patch
+++++ b/23127114_23127317_23127453.patch
++@@ -1,71 +0,0 @@
++-diff --git a/23127114_23127317_23127453.patch b/23127114_23127317_23127453.patch
++-index 8c1d755..e69de29 100644
++---- a/23127114_23127317_23127453.patch
++-+++ b/23127114_23127317_23127453.patch
++-@@ -1,66 +0,0 @@
++--diff --git a/23127114_23127317_23127453.patch b/23127114_23127317_23127453.patch
++--deleted file mode 100644
++--index e69de29..0000000
++--diff --git a/Makefile b/Makefile
++--index db18b8d..74e454f 100644
++----- a/Makefile
++--+++ b/Makefile
++--@@ -194,7 +194,7 @@ UPROGS=\
++-- 	$U/_grind\
++-- 	$U/_wc\
++-- 	$U/_zombie\
++---	$U/_xargs\
++--+
++-- 
++-- 
++-- 
++--diff --git a/user/xargs.c b/user/xargs.c
++--deleted file mode 100644
++--index 929dc7a..0000000
++----- a/user/xargs.c
++--+++ /dev/null
++--@@ -1,43 +0,0 @@
++---#include "kernel/types.h"
++---#include "kernel/param.h"
++---#include "user/user.h"
++---
++---int main(int argc, char* argv[]) {
++---    char *nargs[MAXARG];
++---    int argCount = 0;
++---    for(int i = 1; i < argc; i++) {
++---        nargs[argCount++] = argv[i];
++---    }
++---
++---    char tmpchar = 0;
++---    char buffer[1024];
++---
++---    int status = 1;
++---    while(status) {
++---        int pos = 0;
++---        int argStartPos = 0;
++---        
++---        while(1) {
++---            status = read(0, &tmpchar, 1);
++---            if(status == 0) exit(0);
++---            if(tmpchar != ' ' && tmpchar != '\n') {
++---                buffer[pos++] = tmpchar;
++---            } else if(tmpchar == ' ') {
++---                buffer[pos++] = 0;
++---                nargs[argCount++] = &buffer[argStartPos];
++---                argStartPos = pos;
++---            } else if(tmpchar == '\n') {
++---                nargs[argCount++] = &buffer[argStartPos];
++---                argStartPos = pos;
++---                break;
++---            }
++---        }
++---
++---        if(fork() == 0) {
++---            exec(nargs[0], nargs);
++---        } else {
++---            wait(0);
++---        }
++---    }
++---    exit(0);
++---}
++--\ No newline at end of file
+diff --git a/Makefile b/Makefile
+index 74e454f..d82a628 100644
+--- a/Makefile
++++ b/Makefile
+@@ -194,7 +194,10 @@ UPROGS=\
+ 	$U/_grind\
+ 	$U/_wc\
+ 	$U/_zombie\
+-
++	$U/_xargs\
++	$U/_pingpong\
++	$U/_primes\
++	$U/_find\
+ 
+ 
+ 
+diff --git a/user/find.c b/user/find.c
+new file mode 100644
+index 0000000..4886a72
+--- /dev/null
++++ b/user/find.c
+@@ -0,0 +1,74 @@
++#include "kernel/types.h"
++#include "kernel/stat.h"
++#include "user/user.h"
++#include "kernel/fs.h"
++
++
++void find(char* path, char* filename) {
++    char buf[512], *p;
++    int fd;
++    struct dirent de;
++    struct stat st;
++
++    if((fd = open(path, 0)) < 0) {
++        fprintf(2, "find: cannot open %s\n", path);
++        return;
++    }
++
++    if(fstat(fd, &st) < 0) {
++        fprintf(2, "find: cannot stat %s\n", path);
++        close(fd);
++        return;
++    }
++
++    if(st.type != T_DIR) {
++        fprintf(2, "find: %s is not a directory\n", path);
++        close(fd);
++        return;
++    }
++    if(strlen(path) + 1 + DIRSIZ + 1 > sizeof buf){
++        printf("find: path too long\n");
++        close(fd);
++        return;
++    }
++
++    strcpy(buf, path);
++    p = buf+strlen(buf);
++    *p++ = '/';
++
++    while(read(fd, &de, sizeof(de)) == sizeof(de)) {
++        if(de.inum == 0) 
++            continue;
++        if(strcmp(de.name, ".") == 0 || strcmp(de.name, "..") == 0)
++            continue;
++        memmove(p, de.name, DIRSIZ);
++        p[DIRSIZ] = 0;
++        if(stat(buf, &st) < 0) {
++            fprintf(2, "find: cannot stat %s\n", buf);;
++            continue;
++        }
++
++        switch (st.type)
++        {
++        case T_FILE:
++            if(strcmp(de.name, filename) == 0) {
++                printf("%s\n", buf);
++            }
++            break;
++        
++        case T_DIR:
++            find(buf, filename);
++        }
++    }
++    close(fd);
++}
++
++int main(int argc, char *argv[])
++{
++  if(argc < 3){
++    fprintf(2, "Usage: find path filename\n");
++    exit(1);
++  }
++  find(argv[1], argv[2]);
++  exit(0);
++}
+diff --git a/user/pingpong.c b/user/pingpong.c
+new file mode 100644
+index 0000000..35b3efe
+--- /dev/null
++++ b/user/pingpong.c
+@@ -0,0 +1,38 @@
++#include "kernel/types.h"
++#include "user/user.h"
++
++int 
++main(int argc, char* argv[]) {
++    int parent_fd[2], child_fd[2];
++    char buf[10];
++
++    if(pipe(parent_fd) < 0 || pipe(child_fd) < 0) {
++        fprintf(2, "Error: Can't create pipe!\n");
++        exit(1);
++    }
++    int pid = fork();
++
++    if(pid == 0) {  //children process
++        close(parent_fd[1]); //close write
++        close(child_fd[0]);
++        read(parent_fd[0], buf, 1);
++        if(buf[0] == 'i') {
++            printf("%d: received ping\n", getpid());
++        }
++        write(child_fd[1], "o", 1);
++        close(parent_fd[0]);
++        close(child_fd[1]);
++    } else {
++        close(parent_fd[0]);
++        close(child_fd[1]);
++        write(parent_fd[1], "i", 1);
++        read(child_fd[0], buf, 1);
++        if(buf[0] == 'o') {
++            printf("%d: received pong\n", getpid());
++        }
++        close(parent_fd[1]);
++        close(child_fd[0]);
++    }
++    exit(0);
++
++}
+\ No newline at end of file
+diff --git a/user/primes.c b/user/primes.c
+new file mode 100644
+index 0000000..4081e20
+--- /dev/null
++++ b/user/primes.c
+@@ -0,0 +1,67 @@
++#include "kernel/types.h"
++#include "user/user.h"
++
++void primes() {
++    int p[2];
++    int num;
++
++    if(read(0, (void*)&num, sizeof(num)) <= 0)
++        return;
++    
++    printf("prime %d\n", num);
++    if(pipe(p) < 0) {
++        fprintf(2, "Error: cannot create pipe");
++        exit(1);
++    }
++    int pid = fork();
++    if(pid == 0) {
++        close(0);
++        dup(p[0]);
++        close(p[0]);
++        close(p[1]);
++        primes();
++    } else {
++        close(1);
++        dup(p[1]);
++        close(p[0]);
++        close(p[1]);
++        int tmpnum = 0;
++        while(read(0, (void*)&tmpnum, sizeof(tmpnum))) {
++            if(tmpnum % num != 0) {
++                write(1, (void*)&tmpnum, sizeof(tmpnum));
++            }
++        }
++        close(1);
++        wait(&pid);
++    }
++
++    
++}
++
++int main(int argc, char* argv[]) {
++    int p[2];
++    if(pipe(p) < 0) {
++        fprintf(2, "Error: cannot create pipe");
++        exit(1);
++    }
++
++    int pid = fork();
++    if(pid == 0) {
++        close(0);
++        dup(p[0]);
++        close(p[0]);
++        close(p[1]);
++        primes();
++    } else {
++        close(1);
++        dup(p[1]);
++        close(p[0]);
++        close(p[1]);
++        for(int i = 2; i <= 35; i++) {
++            write(1, (void*)&i, sizeof(i));
++        }
++        close(1);
++        wait(&pid);
++    }
++    exit(0);
++}
+\ No newline at end of file
+diff --git a/user/xargs.c b/user/xargs.c
+new file mode 100644
+index 0000000..929dc7a
+--- /dev/null
++++ b/user/xargs.c
+@@ -0,0 +1,43 @@
++#include "kernel/types.h"
++#include "kernel/param.h"
++#include "user/user.h"
++
++int main(int argc, char* argv[]) {
++    char *nargs[MAXARG];
++    int argCount = 0;
++    for(int i = 1; i < argc; i++) {
++        nargs[argCount++] = argv[i];
++    }
++
++    char tmpchar = 0;
++    char buffer[1024];
++
++    int status = 1;
++    while(status) {
++        int pos = 0;
++        int argStartPos = 0;
++        
++        while(1) {
++            status = read(0, &tmpchar, 1);
++            if(status == 0) exit(0);
++            if(tmpchar != ' ' && tmpchar != '\n') {
++                buffer[pos++] = tmpchar;
++            } else if(tmpchar == ' ') {
++                buffer[pos++] = 0;
++                nargs[argCount++] = &buffer[argStartPos];
++                argStartPos = pos;
++            } else if(tmpchar == '\n') {
++                nargs[argCount++] = &buffer[argStartPos];
++                argStartPos = pos;
++                break;
++            }
++        }
++
++        if(fork() == 0) {
++            exec(nargs[0], nargs);
++        } else {
++            wait(0);
++        }
++    }
++    exit(0);
++}
+\ No newline at end of file
