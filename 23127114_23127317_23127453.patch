@@ -1,71 +1,76 @@
 diff --git a/23127114_23127317_23127453.patch b/23127114_23127317_23127453.patch
-index 8c1d755..e69de29 100644
+index 04fa0e7..e69de29 100644
 --- a/23127114_23127317_23127453.patch
 +++ b/23127114_23127317_23127453.patch
-@@ -1,66 +0,0 @@
+@@ -1,71 +0,0 @@
 -diff --git a/23127114_23127317_23127453.patch b/23127114_23127317_23127453.patch
--deleted file mode 100644
--index e69de29..0000000
--diff --git a/Makefile b/Makefile
--index db18b8d..74e454f 100644
----- a/Makefile
--+++ b/Makefile
--@@ -194,7 +194,7 @@ UPROGS=\
-- 	$U/_grind\
-- 	$U/_wc\
-- 	$U/_zombie\
---	$U/_xargs\
--+
-- 
-- 
-- 
--diff --git a/user/xargs.c b/user/xargs.c
--deleted file mode 100644
--index 929dc7a..0000000
----- a/user/xargs.c
--+++ /dev/null
--@@ -1,43 +0,0 @@
---#include "kernel/types.h"
---#include "kernel/param.h"
---#include "user/user.h"
---
---int main(int argc, char* argv[]) {
---    char *nargs[MAXARG];
---    int argCount = 0;
---    for(int i = 1; i < argc; i++) {
---        nargs[argCount++] = argv[i];
---    }
---
---    char tmpchar = 0;
---    char buffer[1024];
---
---    int status = 1;
---    while(status) {
---        int pos = 0;
---        int argStartPos = 0;
---        
---        while(1) {
---            status = read(0, &tmpchar, 1);
---            if(status == 0) exit(0);
---            if(tmpchar != ' ' && tmpchar != '\n') {
---                buffer[pos++] = tmpchar;
---            } else if(tmpchar == ' ') {
---                buffer[pos++] = 0;
---                nargs[argCount++] = &buffer[argStartPos];
---                argStartPos = pos;
---            } else if(tmpchar == '\n') {
---                nargs[argCount++] = &buffer[argStartPos];
---                argStartPos = pos;
---                break;
---            }
---        }
---
---        if(fork() == 0) {
---            exec(nargs[0], nargs);
---        } else {
---            wait(0);
---        }
---    }
---    exit(0);
---}
--\ No newline at end of file
+-index 8c1d755..e69de29 100644
+---- a/23127114_23127317_23127453.patch
+-+++ b/23127114_23127317_23127453.patch
+-@@ -1,66 +0,0 @@
+--diff --git a/23127114_23127317_23127453.patch b/23127114_23127317_23127453.patch
+--deleted file mode 100644
+--index e69de29..0000000
+--diff --git a/Makefile b/Makefile
+--index db18b8d..74e454f 100644
+----- a/Makefile
+--+++ b/Makefile
+--@@ -194,7 +194,7 @@ UPROGS=\
+-- 	$U/_grind\
+-- 	$U/_wc\
+-- 	$U/_zombie\
+---	$U/_xargs\
+--+
+-- 
+-- 
+-- 
+--diff --git a/user/xargs.c b/user/xargs.c
+--deleted file mode 100644
+--index 929dc7a..0000000
+----- a/user/xargs.c
+--+++ /dev/null
+--@@ -1,43 +0,0 @@
+---#include "kernel/types.h"
+---#include "kernel/param.h"
+---#include "user/user.h"
+---
+---int main(int argc, char* argv[]) {
+---    char *nargs[MAXARG];
+---    int argCount = 0;
+---    for(int i = 1; i < argc; i++) {
+---        nargs[argCount++] = argv[i];
+---    }
+---
+---    char tmpchar = 0;
+---    char buffer[1024];
+---
+---    int status = 1;
+---    while(status) {
+---        int pos = 0;
+---        int argStartPos = 0;
+---        
+---        while(1) {
+---            status = read(0, &tmpchar, 1);
+---            if(status == 0) exit(0);
+---            if(tmpchar != ' ' && tmpchar != '\n') {
+---                buffer[pos++] = tmpchar;
+---            } else if(tmpchar == ' ') {
+---                buffer[pos++] = 0;
+---                nargs[argCount++] = &buffer[argStartPos];
+---                argStartPos = pos;
+---            } else if(tmpchar == '\n') {
+---                nargs[argCount++] = &buffer[argStartPos];
+---                argStartPos = pos;
+---                break;
+---            }
+---        }
+---
+---        if(fork() == 0) {
+---            exec(nargs[0], nargs);
+---        } else {
+---            wait(0);
+---        }
+---    }
+---    exit(0);
+---}
+--\ No newline at end of file
