@@ -26,6 +26,11 @@ extern char trampoline[]; // trampoline.S
 // must be acquired before any p->lock.
 struct spinlock wait_lock;
 
+struct {
+  struct spinlock lock;
+  uint64 loadavg[3];  // Load average cho 1, 5, 15 phút
+} loadavg_info;
+
 // Allocate a page for each process's kernel stack.
 // Map it high in memory, followed by an invalid
 // guard page.
@@ -692,4 +697,34 @@ procdump(void)
     printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
   }
+}
+
+int
+collect_proc_num(void)
+{
+  int num = 0;
+  struct proc *p;
+  for(p = proc; p < &proc[NPROC]; p++){
+    if(p->state != UNUSED)
+    num++;
+  }
+  return num;
+}
+
+void
+update_loadavg(void)
+{
+  int runnable_procs = 0;
+  struct proc *p;
+
+  for(p = proc; p < &proc[NPROC]; p++){
+    if(p->state == RUNNABLE || p->state == RUNNING || p->state == SLEEPING)
+      runnable_procs++;
+  }
+
+  acquire(&loadavg_info.lock);
+  loadavg_info.loadavg[0] = (loadavg_info.loadavg[0] * 59 + runnable_procs * 100) / 60;
+  loadavg_info.loadavg[1] = (loadavg_info.loadavg[1] * 299 + runnable_procs * 100) / 300;
+  loadavg_info.loadavg[2] = (loadavg_info.loadavg[2] * 899 + runnable_procs * 100) / 900;
+  release(&loadavg_info.lock);
 }

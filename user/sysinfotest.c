@@ -10,6 +10,13 @@ sinfo(struct sysinfo *info) {
     printf("FAIL: sysinfo failed");
     exit(1);
   }
+
+  printf("Number of processes: %ld\n", info->nproc);
+  printf("Free memory: %ld bytes\n", info->freemem);
+  printf("Load average (1 min): %ld\n", info->loadavg[0]);
+  printf("Load average (5 min): %ld\n", info->loadavg[1]);
+  printf("Load average (15 min): %ld\n", info->loadavg[2]);
+
 }
 
 //
