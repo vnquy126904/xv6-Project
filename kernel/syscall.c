@@ -139,6 +139,40 @@ static uint64 (*syscalls[])(void) = {
 [SYS_sysinfo] sys_sysinfo,
 };
 
+enum arg_type { INT, PTR };  
+
+
+struct syscall_info {
+    int argc;
+    enum arg_type arg_types[6];  
+};  
+
+// Mảng lưu số tham số và kiểu của các tham số của từng system call
+struct syscall_info syscall_table[] = {
+    [SYS_fork]  = {0, {}},  
+    [SYS_exit]  = {1, {INT}},  
+    [SYS_wait]  = {1, {PTR}},  
+    [SYS_pipe]  = {1, {PTR}},  
+    [SYS_read]  = {3, {INT, PTR, INT}},  
+    [SYS_kill]  = {2, {INT, INT}},  
+    [SYS_exec]  = {2, {PTR, PTR}},  
+    [SYS_fstat] = {2, {INT, PTR}},  
+    [SYS_chdir] = {1, {PTR}},  
+    [SYS_dup]   = {1, {INT}},  
+    [SYS_getpid]= {0, {}},  
+    [SYS_sbrk]  = {1, {INT}},  
+    [SYS_sleep] = {1, {INT}},  
+    [SYS_uptime]= {0, {}},  
+    [SYS_open]  = {2, {PTR, INT}},  
+    [SYS_write] = {3, {INT, PTR, INT}},  
+    [SYS_mknod] = {3, {PTR, INT, INT}},  
+    [SYS_unlink]= {1, {PTR}},  
+    [SYS_link]  = {2, {PTR, PTR}},  
+    [SYS_mkdir] = {1, {PTR}},  
+    [SYS_close] = {1, {INT}},  
+};
+
+
 void
 syscall(void)
 {
@@ -147,13 +181,40 @@ syscall(void)
 
   num = p->trapframe->a7;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
-    // Use num to lookup the system call function for num, call it,
-    // and store its return value in p->trapframe->a0
-    p->trapframe->a0 = syscalls[num]();
+    
+    // Lấy số lượng tham số và kiểu của chúng
+    int argc = syscall_table[num].argc;
+    enum arg_type *arg_types = syscall_table[num].arg_types;
+    uint64 args[6] = { p->trapframe->a0, p->trapframe->a1, p->trapframe->a2,
+                       p->trapframe->a3, p->trapframe->a4, p->trapframe->a5 };
+
+    // Gọi system call và lấy giá trị trả về
+    int retval = syscalls[num]();
+
     if((1 << num) & p->mask)
     {
-      printf("%d: syscall %s -> %ld\n", p->pid, syscall_names[num], p->trapframe->a0);
+     // In syscall + đúng số tham số với kiểu phù hợp
+     printf("%d: syscall %s(", p->pid, syscall_names[num]);
+     for (int i = 0; i < argc; i++) {
+         if (i > 0) printf(", ");
+         if (arg_types[i] == INT)
+             printf("%d", (int)args[i]);
+         else{
+          // Thử đọc nội dung nếu là chuỗi
+          char buf[128];
+          if (copyinstr(p->pagetable, buf, (uint64)args[i], sizeof(buf)) >= 0) {
+              printf("\"%s\"", buf);
+          } else {
+              printf("0x%p", (void*)args[i]);  // Không đọc được, in hex
+          }
+         }
+      
+     }
+     printf(") -> %d\n", retval); 
     }
+
+    // Gán giá trị trả về vào thanh ghi a0
+    p->trapframe->a0 = retval;
   } else {
     printf("%d %s: unknown sys call %d\n",
             p->pid, p->name, num);
