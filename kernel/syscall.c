@@ -203,6 +203,7 @@ syscall(void)
           // Thử đọc nội dung nếu là chuỗi
           char buf[128];
           if (copyinstr(p->pagetable, buf, (uint64)args[i], sizeof(buf)) >= 0) {
+              buf[strlen(buf)] = 0;
               printf("\"%s\"", buf);
           } else {
               printf("0x%p", (void*)args[i]);  // Không đọc được, in hex
