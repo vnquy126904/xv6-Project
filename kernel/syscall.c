@@ -139,7 +139,7 @@ static uint64 (*syscalls[])(void) = {
 [SYS_sysinfo] sys_sysinfo,
 };
 
-enum arg_type { INT, PTR };  
+enum arg_type { INT, PTR, PTR_PTR };  
 
 
 struct syscall_info {
@@ -155,7 +155,7 @@ struct syscall_info syscall_table[] = {
     [SYS_pipe]  = {1, {PTR}},  
     [SYS_read]  = {3, {INT, PTR, INT}},  
     [SYS_kill]  = {2, {INT, INT}},  
-    [SYS_exec]  = {2, {PTR, PTR}},  
+    [SYS_exec]  = {2, {PTR, PTR_PTR}},  
     [SYS_fstat] = {2, {INT, PTR}},  
     [SYS_chdir] = {1, {PTR}},  
     [SYS_dup]   = {1, {INT}},  
@@ -196,18 +196,20 @@ syscall(void)
      // In syscall + đúng số tham số với kiểu phù hợp
      printf("%d: syscall %s(", p->pid, syscall_names[num]);
      for (int i = 0; i < argc; i++) {
-         if (i > 0) printf(", ");
-         if (arg_types[i] == INT)
+          if (i > 0) printf(", ");
+          if (arg_types[i] == INT)
              printf("%d", (int)args[i]);
-         else{
-          // Thử đọc nội dung nếu là chuỗi
-          char buf[128];
-          if (copyinstr(p->pagetable, buf, (uint64)args[i], sizeof(buf)) >= 0) {
+          else if (arg_types[i] == PTR_PTR)
+             printf("%p", (void*)args[i]);
+          else{
+            // Thử đọc nội dung nếu là chuỗi
+            char buf[128];
+            if (copyinstr(p->pagetable, buf, (uint64)args[i], sizeof(buf)) >= 0) {
               buf[strlen(buf)] = 0;
               printf("\"%s\"", buf);
-          } else {
-              printf("0x%p", (void*)args[i]);  // Không đọc được, in hex
-          }
+            } else {
+              printf("%p", (void*)args[i]);  // Không đọc được, in hex
+            }
          }
       
      }
