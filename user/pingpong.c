@@ -10,29 +10,36 @@ main(int argc, char* argv[]) {
         fprintf(2, "Error: Can't create pipe!\n");
         exit(1);
     }
+    
     int pid = fork();
 
     if(pid == 0) {  //children process
         close(parent_fd[1]); //close write
         close(child_fd[0]);
         read(parent_fd[0], buf, 1);
+
         if(buf[0] == 'i') {
             printf("%d: received ping\n", getpid());
         }
+
         write(child_fd[1], "o", 1);
         close(parent_fd[0]);
         close(child_fd[1]);
-    } else {
+    } 
+    
+    else {
         close(parent_fd[0]);
         close(child_fd[1]);
         write(parent_fd[1], "i", 1);
         read(child_fd[0], buf, 1);
+
         if(buf[0] == 'o') {
             printf("%d: received pong\n", getpid());
         }
+
         close(parent_fd[1]);
         close(child_fd[0]);
     }
-    exit(0);
 
+    exit(0);
 }

@@ -5,6 +5,7 @@
 int main(int argc, char* argv[]) {
     char *nargs[MAXARG];
     int argCount = 0;
+
     for(int i = 1; i < argc; i++) {
         nargs[argCount++] = argv[i];
     }
@@ -20,13 +21,18 @@ int main(int argc, char* argv[]) {
         while(1) {
             status = read(0, &tmpchar, 1);
             if(status == 0) exit(0);
+
             if(tmpchar != ' ' && tmpchar != '\n') {
                 buffer[pos++] = tmpchar;
-            } else if(tmpchar == ' ') {
+            } 
+            
+            else if(tmpchar == ' ') {
                 buffer[pos++] = 0;
                 nargs[argCount++] = &buffer[argStartPos];
                 argStartPos = pos;
-            } else if(tmpchar == '\n') {
+            } 
+            
+            else if(tmpchar == '\n') {
                 nargs[argCount++] = &buffer[argStartPos];
                 argStartPos = pos;
                 break;
@@ -35,9 +41,12 @@ int main(int argc, char* argv[]) {
 
         if(fork() == 0) {
             exec(nargs[0], nargs);
-        } else {
+        } 
+        
+        else {
             wait(0);
         }
     }
+    
     exit(0);
 }

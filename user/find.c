@@ -26,6 +26,7 @@ void find(char* path, char* filename) {
         close(fd);
         return;
     }
+
     if(strlen(path) + 1 + DIRSIZ + 1 > sizeof buf){
         printf("find: path too long\n");
         close(fd);
@@ -39,10 +40,13 @@ void find(char* path, char* filename) {
     while(read(fd, &de, sizeof(de)) == sizeof(de)) {
         if(de.inum == 0) 
             continue;
+
         if(strcmp(de.name, ".") == 0 || strcmp(de.name, "..") == 0)
             continue;
+
         memmove(p, de.name, DIRSIZ);
         p[DIRSIZ] = 0;
+
         if(stat(buf, &st) < 0) {
             fprintf(2, "find: cannot stat %s\n", buf);;
             continue;
@@ -69,6 +73,7 @@ int main(int argc, char *argv[])
     fprintf(2, "Usage: find path filename\n");
     exit(1);
   }
+  
   find(argv[1], argv[2]);
   exit(0);
 }

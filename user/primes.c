@@ -9,28 +9,35 @@ void primes() {
         return;
     
     printf("prime %d\n", num);
+
     if(pipe(p) < 0) {
         fprintf(2, "Error: cannot create pipe");
         exit(1);
     }
+
     int pid = fork();
+
     if(pid == 0) {
         close(0);
         dup(p[0]);
         close(p[0]);
         close(p[1]);
         primes();
-    } else {
+    } 
+
+    else {
         close(1);
         dup(p[1]);
         close(p[0]);
         close(p[1]);
         int tmpnum = 0;
+
         while(read(0, (void*)&tmpnum, sizeof(tmpnum))) {
             if(tmpnum % num != 0) {
                 write(1, (void*)&tmpnum, sizeof(tmpnum));
             }
         }
+
         close(1);
         wait(&pid);
     }
@@ -40,28 +47,35 @@ void primes() {
 
 int main(int argc, char* argv[]) {
     int p[2];
+
     if(pipe(p) < 0) {
         fprintf(2, "Error: cannot create pipe");
         exit(1);
     }
 
     int pid = fork();
+
     if(pid == 0) {
         close(0);
         dup(p[0]);
         close(p[0]);
         close(p[1]);
         primes();
-    } else {
+    } 
+    
+    else {
         close(1);
         dup(p[1]);
         close(p[0]);
         close(p[1]);
-        for(int i = 2; i <= 35; i++) {
+
+        for(int i = 2; i <= 280; i++) {
             write(1, (void*)&i, sizeof(i));
         }
+
         close(1);
         wait(&pid);
     }
+    
     exit(0);
 }
