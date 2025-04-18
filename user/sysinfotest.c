@@ -122,17 +122,11 @@ void testproc() {
 
 void
 testloadavg() {
-  struct sysinfo info;
+  /*struct sysinfo info;
   int i;
-
-  //printf("sysinfotest: starting loadavg test\n");
 
   // Lấy thông tin hệ thống lần đầu
   sinfo(&info);
-
-  // In giá trị loadavg ban đầu (nhân 100)
-  //printf("Initial loadavg (x100): 1m=%d, 5m=%d, 15m=%d\n",
-  //       info.loadavg[0], info.loadavg[1], info.loadavg[2]);
 
   // Kiểm tra cơ bản: các giá trị không nên quá lớn một cách vô lý.
   // Đây là kiểm tra heuristic, giả sử load * 100 không vượt quá 100000.
@@ -144,15 +138,10 @@ testloadavg() {
   }
 
   // Đợi một chút để cho phép kernel cập nhật loadavg (nếu có)
-  //printf("Waiting a bit for potential loadavg update...\n");
   sleep(10); // Đợi 10 ticks (có thể cần điều chỉnh)
 
   // Lấy thông tin hệ thống lần nữa
   sinfo(&info);
-
-  // In giá trị loadavg sau khi đợi
-  //printf("Loadavg after wait (x100): 1m=%d, 5m=%d, 15m=%d\n",
-  //       info.loadavg[0], info.loadavg[1], info.loadavg[2]);
 
   // Kiểm tra lại tính hợp lệ cơ bản
   for(i = 0; i < 3; i++) {
@@ -160,9 +149,59 @@ testloadavg() {
        printf("FAIL: Loadavg value %d after wait seems unreasonably large: %ld\n", i, info.loadavg[i]);
        exit(1);
     }
+  }*/
+  int i;
+  struct sysinfo info;
+  int prev_loadavg[3];
+  int diff_observed = 0;
+  
+  // First call to get initial values
+  if (sysinfo(&info) < 0) {
+    printf("sysinfo failed\n");
+    exit(1);
   }
-
-  //printf("sysinfotest: loadavg test finished (basic checks passed)\n");
+  
+  // Store initial values
+  for (i = 0; i < 3; i++) {
+    prev_loadavg[i] = info.loadavg[i];
+  }
+  
+  // Create some load to change the load average
+  if (fork() == 0) {
+    // Child process - just consume CPU for a while
+    for (i = 0; i < 1000000000; i++) {
+      // Busy wait to create load
+      (void)i;
+    }
+    exit(0);
+  }
+  
+  // Parent process - also consume some CPU
+  for (i = 0; i < 500000000; i++) {
+    // Busy wait to create load
+    (void)i;
+  }
+  
+  // Wait for child to finish
+  wait(0);
+  
+  // Second call to get updated values
+  if (sysinfo(&info) < 0) {
+    printf("sysinfo failed\n");
+    exit(1);
+  }
+  
+  // Check if load averages have changed
+  for (i = 0; i < 3; i++) {
+    if (info.loadavg[i] != prev_loadavg[i]) {
+      diff_observed = 1;
+    }
+  }
+  
+  if (diff_observed == 0) {
+    printf("loadavgtest: FAILED - load averages did not change\n");
+    exit(1);
+  }
 }
 
 void testbad() {
