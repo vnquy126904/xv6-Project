@@ -120,6 +120,51 @@ void testproc() {
   }
 }
 
+void
+testloadavg() {
+  struct sysinfo info;
+  int i;
+
+  //printf("sysinfotest: starting loadavg test\n");
+
+  // Lấy thông tin hệ thống lần đầu
+  sinfo(&info);
+
+  // In giá trị loadavg ban đầu (nhân 100)
+  //printf("Initial loadavg (x100): 1m=%d, 5m=%d, 15m=%d\n",
+  //       info.loadavg[0], info.loadavg[1], info.loadavg[2]);
+
+  // Kiểm tra cơ bản: các giá trị không nên quá lớn một cách vô lý.
+  // Đây là kiểm tra heuristic, giả sử load * 100 không vượt quá 100000.
+  for(i = 0; i < 3; i++) {
+    if(info.loadavg[i] > 100000) { // Kiểm tra giá trị lớn bất thường
+       printf("FAIL: Initial loadavg value %d seems unreasonably large: %ld\n", i, info.loadavg[i]);
+       exit(1);
+    }
+  }
+
+  // Đợi một chút để cho phép kernel cập nhật loadavg (nếu có)
+  //printf("Waiting a bit for potential loadavg update...\n");
+  sleep(10); // Đợi 10 ticks (có thể cần điều chỉnh)
+
+  // Lấy thông tin hệ thống lần nữa
+  sinfo(&info);
+
+  // In giá trị loadavg sau khi đợi
+  //printf("Loadavg after wait (x100): 1m=%d, 5m=%d, 15m=%d\n",
+  //       info.loadavg[0], info.loadavg[1], info.loadavg[2]);
+
+  // Kiểm tra lại tính hợp lệ cơ bản
+  for(i = 0; i < 3; i++) {
+    if(info.loadavg[i] > 100000) { // Kiểm tra giá trị lớn bất thường
+       printf("FAIL: Loadavg value %d after wait seems unreasonably large: %ld\n", i, info.loadavg[i]);
+       exit(1);
+    }
+  }
+
+  //printf("sysinfotest: loadavg test finished (basic checks passed)\n");
+}
+
 void testbad() {
   int pid = fork();
   int xstatus;
@@ -148,6 +193,7 @@ main(int argc, char *argv[])
   testcall();
   testmem();
   testproc();
+  testloadavg();
   printf("sysinfotest: OK\n");
   exit(0);
 }
