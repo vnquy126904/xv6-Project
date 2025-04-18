@@ -122,34 +122,6 @@ void testproc() {
 
 void
 testloadavg() {
-  /*struct sysinfo info;
-  int i;
-
-  // Lấy thông tin hệ thống lần đầu
-  sinfo(&info);
-
-  // Kiểm tra cơ bản: các giá trị không nên quá lớn một cách vô lý.
-  // Đây là kiểm tra heuristic, giả sử load * 100 không vượt quá 100000.
-  for(i = 0; i < 3; i++) {
-    if(info.loadavg[i] > 100000) { // Kiểm tra giá trị lớn bất thường
-       printf("FAIL: Initial loadavg value %d seems unreasonably large: %ld\n", i, info.loadavg[i]);
-       exit(1);
-    }
-  }
-
-  // Đợi một chút để cho phép kernel cập nhật loadavg (nếu có)
-  sleep(10); // Đợi 10 ticks (có thể cần điều chỉnh)
-
-  // Lấy thông tin hệ thống lần nữa
-  sinfo(&info);
-
-  // Kiểm tra lại tính hợp lệ cơ bản
-  for(i = 0; i < 3; i++) {
-    if(info.loadavg[i] > 100000) { // Kiểm tra giá trị lớn bất thường
-       printf("FAIL: Loadavg value %d after wait seems unreasonably large: %ld\n", i, info.loadavg[i]);
-       exit(1);
-    }
-  }*/
   int i;
   struct sysinfo info;
   int prev_loadavg[3];
